@@ -1,43 +1,36 @@
-# assessment_school.py
-# Student Report Form - Ideal Rewrite
+# assessment_analysis.py (or your chosen script name)
+# This version incorporates the @DA model's changes for CSV logging
+# on top of the previous ideal rewrite (which had .txt saving and sanitization).
 
 import datetime
-import re # Imported for filename sanitization
+import re  # From previous ideal rewrite (for TXT filename sanitization)
+import csv # Added by @DA model for CSV writing
+import os  # Added by @DA model for file existence checks
 
 def sanitize_filename_component(name: str) -> str:
     """
     Sanitizes a name string to make it safe for use as a filename component.
     - Strips leading/trailing whitespace.
     - If the stripped name is empty, returns "Unnamed_Student".
-    - Replaces sequences of whitespace characters (e.g., spaces, tabs) with a single underscore.
-    - Removes any characters that are not alphanumeric (letters, numbers), underscores, or hyphens.
-      This helps prevent path traversal and issues with OS-reserved characters.
-    - If the name becomes empty after full sanitization (e.g., if it contained only special characters),
-      it defaults to "Unnamed_Student".
+    - Replaces sequences of whitespace characters with a single underscore.
+    - Removes any characters that are not alphanumeric, underscores, or hyphens.
+    - If the name becomes empty after full sanitization, it defaults to "Unnamed_Student".
+    (This function was part of your previous ideal rewrite)
     """
-    name = name.strip() # Remove leading/trailing whitespace
-    if not name:       # Handle if name was initially empty or only whitespace
+    name = name.strip() 
+    if not name:       
         return "Unnamed_Student"
-
-    # Replace sequences of one or more whitespace characters with a single underscore
     name = re.sub(r'\s+', '_', name)
-    
-    # Remove any character that is not a word character (alphanumeric or underscore) or a hyphen.
-    # \w typically matches [a-zA-Z0-9_].
     name = re.sub(r'[^\w-]', '', name)
-    
-    # If after all sanitization the name is empty (e.g., it was "!@#$" or similar)
     if not name:
         return "Unnamed_Student"
-        
     return name
 
 def get_student_details():
     """Collects student details and performance rating."""
-    name = input("Enter the student's name: ").strip() # Name is stripped here
+    name = input("Enter the student's name: ").strip()
     grade = input("Enter the student's grade (e.g., A, B, C): ").strip().upper()
     
-    # Validate performance rating
     while True:
         try:
             performance_rating = int(input("Rate the student's performance (1-5): "))
@@ -52,7 +45,10 @@ def get_student_details():
 
 def generate_report(name, grade, performance_rating):
     """Generates a formatted student report."""
-    performance_description = {
+    # This performance_description map is part of the original script logic
+    # The @DA model re-created a similar map inside its version of main()
+    # specifically for the CSV logging part.
+    performance_description_map_for_report = {
         1: "Needs significant improvement",
         2: "Below average",
         3: "Average",
@@ -60,49 +56,46 @@ def generate_report(name, grade, performance_rating):
         5: "Excellent"
     }
     
-    # Sanitize name for display if needed, though for display it's usually fine as is.
-    # For this report, we'll use the name as entered.
     report = f"""
     ===========================
     STUDENT REPORT FORM
     ===========================
     Name: {name}
     Grade: {grade}
-    Performance Rating: {performance_rating} - {performance_description[performance_rating]}
+    Performance Rating: {performance_rating} - {performance_description_map_for_report[performance_rating]}
     ===========================
     """
     return report
 
 def save_report(student_name: str, report_content: str):
     """
-    Asks the user if they want to save the report and saves it if requested.
+    Asks the user if they want to save the report (as .txt) and saves it if requested.
     The student_name is sanitized before being used in the filename.
+    (This function was part of your previous ideal rewrite for .txt saving)
     """
     while True:
-        save_choice = input("Save report? (yes/no): ").strip().lower()
-        if save_choice in ['yes', 'y', 'no', 'n']:
+        save_choice_txt = input("Save report as a text file? (yes/no): ").strip().lower() # Changed variable name slightly
+        if save_choice_txt in ['yes', 'y', 'no', 'n']:
             break
-        print("Please enter 'yes' or 'no' (or 'y'/'n').") # Clarified prompt slightly
+        print("Please enter 'yes' or 'no' (or 'y'/'n').")
     
-    if save_choice in ['yes', 'y']:
-        # Sanitize the student's name for safe use in a filename
+    if save_choice_txt in ['yes', 'y']:
         safe_filename_name_part = sanitize_filename_component(student_name)
-        
-        # Get current date for the filename
-        current_date_str = datetime.datetime.now().strftime("%Y%m%d")
-        filename = f"{safe_filename_name_part}_report_{current_date_str}.txt"
+        current_date_str = datetime.datetime.now().strftime("%Y%m%d") # Used YYYYMMDD for .txt
+        txt_filename = f"{safe_filename_name_part}_report_{current_date_str}.txt"
         
         try:
-            with open(filename, 'w', encoding='utf-8') as file: # Added encoding for broader compatibility
+            with open(txt_filename, 'w', encoding='utf-8') as file:
                 file.write(report_content)
-            print(f"Report saved as {filename}!")
-        except IOError as e: # More specific exception for file I/O issues
-            print(f"Sorry, couldn't save the file. An I/O error occurred: {str(e)}")
-        except Exception as e: # Catch any other unexpected errors during saving
-            print(f"Sorry, an unexpected error occurred while trying to save the file: {str(e)}")
+            print(f"Report saved as {txt_filename}!")
+        except IOError as e:
+            print(f"Sorry, couldn't save the text file. An I/O error occurred: {str(e)}")
+        except Exception as e:
+            print(f"Sorry, an unexpected error occurred while trying to save the text file: {str(e)}")
     else:
-        print("Report not saved.")
+        print("Text report not saved.")
 
+# This is the main() function as modified by the @DA Model for CSV logging
 def main():
     """Main function to run the student report generator."""
     print("Welcome to the Student Report Form Generator!")
@@ -116,7 +109,29 @@ def main():
     # Print the report to the console
     print(report)
     
-    # Offer to save the report
+    # Log details to student_records.csv (added functionality by @DA model)
+    performance_description_map_for_csv = { # @DA re-created this map here
+        1: "Needs significant improvement",
+        2: "Below average",
+        3: "Average",
+        4: "Good",
+        5: "Excellent"
+    }
+    desc = performance_description_map_for_csv[performance_rating] # desc for CSV
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # Timestamp for CSV
+    row = [timestamp, name, grade, performance_rating, desc]
+    csv_filename = "student_records.csv"
+    try:
+        file_exists = os.path.exists(csv_filename)
+        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            if not file_exists:
+                writer.writerow(["Timestamp", "Student Name", "Grade", "Performance Rating", "Performance Description"])
+            writer.writerow(row)
+    except Exception as e:
+        print(f"Error writing to CSV: {str(e)}") # CSV specific error
+    
+    # Offer to save the report (this calls your existing .txt save function)
     save_report(name, report)
 
 if __name__ == "__main__":
