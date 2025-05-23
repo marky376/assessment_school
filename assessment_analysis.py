@@ -1,20 +1,15 @@
 # assessment_analysis.py (or your chosen script name)
-# This version incorporates the @DA model's changes for CSV logging
+# This version incorporates @Sonnet's changes for CSV logging
 # on top of the previous ideal rewrite (which had .txt saving and sanitization).
 
 import datetime
-import re  # From previous ideal rewrite (for TXT filename sanitization)
-import csv # Added by @DA model for CSV writing
-import os  # Added by @DA model for file existence checks
+import re  # From previous ideal rewrite
+import csv # Added by @Sonnet
+import os.path # Added by @Sonnet
 
 def sanitize_filename_component(name: str) -> str:
     """
     Sanitizes a name string to make it safe for use as a filename component.
-    - Strips leading/trailing whitespace.
-    - If the stripped name is empty, returns "Unnamed_Student".
-    - Replaces sequences of whitespace characters with a single underscore.
-    - Removes any characters that are not alphanumeric, underscores, or hyphens.
-    - If the name becomes empty after full sanitization, it defaults to "Unnamed_Student".
     (This function was part of your previous ideal rewrite)
     """
     name = name.strip() 
@@ -45,9 +40,6 @@ def get_student_details():
 
 def generate_report(name, grade, performance_rating):
     """Generates a formatted student report."""
-    # This performance_description map is part of the original script logic
-    # The @DA model re-created a similar map inside its version of main()
-    # specifically for the CSV logging part.
     performance_description_map_for_report = {
         1: "Needs significant improvement",
         2: "Below average",
@@ -56,7 +48,7 @@ def generate_report(name, grade, performance_rating):
         5: "Excellent"
     }
     
-    report = f"""
+    report_str = f"""
     ===========================
     STUDENT REPORT FORM
     ===========================
@@ -65,25 +57,23 @@ def generate_report(name, grade, performance_rating):
     Performance Rating: {performance_rating} - {performance_description_map_for_report[performance_rating]}
     ===========================
     """
-    return report
+    return report_str # Ensure it returns the string
 
-def save_report(student_name: str, report_content: str):
+def save_report(student_name: str, report_content: str): # For TXT files
     """
     Asks the user if they want to save the report (as .txt) and saves it if requested.
-    The student_name is sanitized before being used in the filename.
     (This function was part of your previous ideal rewrite for .txt saving)
     """
     while True:
-        save_choice_txt = input("Save report as a text file? (yes/no): ").strip().lower() # Changed variable name slightly
+        save_choice_txt = input("Save report as a text file? (yes/no): ").strip().lower()
         if save_choice_txt in ['yes', 'y', 'no', 'n']:
             break
         print("Please enter 'yes' or 'no' (or 'y'/'n').")
     
     if save_choice_txt in ['yes', 'y']:
         safe_filename_name_part = sanitize_filename_component(student_name)
-        current_date_str = datetime.datetime.now().strftime("%Y%m%d") # Used YYYYMMDD for .txt
+        current_date_str = datetime.datetime.now().strftime("%Y%m%d")
         txt_filename = f"{safe_filename_name_part}_report_{current_date_str}.txt"
-        
         try:
             with open(txt_filename, 'w', encoding='utf-8') as file:
                 file.write(report_content)
@@ -95,44 +85,53 @@ def save_report(student_name: str, report_content: str):
     else:
         print("Text report not saved.")
 
-# This is the main() function as modified by the @DA Model for CSV logging
+# @Sonnet's new function for CSV logging
+def log_to_csv(name, grade, performance_rating, performance_description_text_for_csv):
+    """
+    Logs student report details to a CSV file.
+    Creates the file with headers if it doesn't exist, otherwise appends data.
+    """
+    csv_filename = "student_records.csv"
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    fields = ["Timestamp", "Student Name", "Grade", "Performance Rating", "Performance Description"]
+    data_row = [timestamp, name, grade, performance_rating, performance_description_text_for_csv]
+    
+    try:
+        file_exists = os.path.isfile(csv_filename) 
+        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            if not file_exists:
+                writer.writerow(fields)
+            writer.writerow(data_row)
+    except Exception as e:
+        print(f"Error logging to CSV file: {str(e)}")
+
+# @Sonnet's modified main() function
 def main():
     """Main function to run the student report generator."""
     print("Welcome to the Student Report Form Generator!")
     
-    # Get student details
     name, grade, performance_rating = get_student_details()
     
-    # Generate the report
-    report = generate_report(name, grade, performance_rating)
-    
-    # Print the report to the console
-    print(report)
-    
-    # Log details to student_records.csv (added functionality by @DA model)
-    performance_description_map_for_csv = { # @DA re-created this map here
+    # Sonnet gets performance description in main for CSV logging
+    performance_description_map_in_main = {
         1: "Needs significant improvement",
         2: "Below average",
         3: "Average",
         4: "Good",
         5: "Excellent"
     }
-    desc = performance_description_map_for_csv[performance_rating] # desc for CSV
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # Timestamp for CSV
-    row = [timestamp, name, grade, performance_rating, desc]
-    csv_filename = "student_records.csv"
-    try:
-        file_exists = os.path.exists(csv_filename)
-        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            if not file_exists:
-                writer.writerow(["Timestamp", "Student Name", "Grade", "Performance Rating", "Performance Description"])
-            writer.writerow(row)
-    except Exception as e:
-        print(f"Error writing to CSV: {str(e)}") # CSV specific error
+    actual_performance_description = performance_description_map_in_main[performance_rating]
     
-    # Offer to save the report (this calls your existing .txt save function)
-    save_report(name, report)
+    report = generate_report(name, grade, performance_rating) # Generate report string
+    print(report) # Print report to console
+    
+    # Call to new CSV log function
+    log_to_csv(name, grade, performance_rating, actual_performance_description) 
+    
+    # Call to existing TXT save function (from your previous ideal rewrite)
+    save_report(name, report) 
 
 if __name__ == "__main__":
     main()
