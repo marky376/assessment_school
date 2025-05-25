@@ -1,15 +1,17 @@
 # assessment_school.py
-# Student Report Form - Object-Oriented Refactoring with CSV Logging
+# Student Report Form - Ideal Object-Oriented Refactor
 
 import datetime
 import re
 import csv
-import os
+import os # For os.path.isfile and os.path.getsize
 
 class Student:
-    """Class to represent a student and their performance data."""
+    """
+    Represents a student, encapsulating their details and performance information.
+    """
     
-    PERFORMANCE_DESCRIPTIONS = {
+    PERFORMANCE_DESCRIPTIONS: dict[int, str] = {
         1: "Needs significant improvement",
         2: "Below average",
         3: "Average",
@@ -17,25 +19,39 @@ class Student:
         5: "Excellent"
     }
     
-    def __init__(self, name, grade, performance_rating):
-        self.name = name
-        self.grade = grade
-        self.performance_rating = performance_rating
+    def __init__(self, name: str, grade: str, performance_rating: int):
+        """
+        Initializes a Student object.
+
+        Args:
+            name (str): The student's name.
+            grade (str): The student's grade (e.g., 'A', 'B').
+            performance_rating (int): The student's performance rating (1-5).
+        """
+        self.name: str = name
+        self.grade: str = grade
+        self.performance_rating: int = performance_rating
     
     @property
-    def performance_description(self):
-        """Returns the text description of the performance rating."""
+    def performance_description(self) -> str:
+        """Returns the textual description of the student's performance rating."""
         return self.PERFORMANCE_DESCRIPTIONS.get(self.performance_rating, "Unknown Rating")
     
     @classmethod
-    def get_student_details_from_user(cls):
-        """Collects student details from user input and returns a Student object."""
-        name = input("Enter the student's name: ").strip()
-        grade = input("Enter the student's grade (e.g., A, B, C): ").strip().upper()
+    def get_student_details_from_user(cls) -> 'Student':
+        """
+        Collects student details (name, grade, rating) via user input
+        and returns a new Student object.
+        Includes input validation for the performance rating.
+        """
+        name: str = input("Enter the student's name: ").strip()
+        grade: str = input("Enter the student's grade (e.g., A, B, C): ").strip().upper()
         
+        performance_rating: int = 0
         while True:
             try:
-                performance_rating = int(input("Rate the student's performance (1-5): "))
+                performance_rating_input = input("Rate the student's performance (1-5): ")
+                performance_rating = int(performance_rating_input)
                 if 1 <= performance_rating <= 5:
                     break
                 else:
@@ -47,14 +63,23 @@ class Student:
 
 
 class Report:
-    """Class to handle report generation, display, and saving to text file."""
+    """
+    Handles the generation, display, and text file saving of a student's report.
+    """
     
-    def __init__(self, student):
-        self.student = student
-        self.report_content = self._generate_report_content()
+    def __init__(self, student: Student):
+        """
+        Initializes a Report object for a given student.
+
+        Args:
+            student (Student): The Student object for whom the report is generated.
+        """
+        self.student: Student = student
+        self.report_content: str = self._generate_report_content()
     
-    def _generate_report_content(self):
-        """Generates the formatted report string."""
+    def _generate_report_content(self) -> str:
+        """Generates the formatted multi-line report string."""
+        # This format must be identical to the original script's output
         return f"""
     ===========================
     STUDENT REPORT FORM
@@ -65,12 +90,15 @@ class Report:
     ===========================
     """
     
-    def display(self):
-        """Prints the report to the console."""
+    def display_on_console(self):
+        """Prints the generated report to the console."""
         print(self.report_content)
     
-    def save_to_txt(self):
-        """Asks the user if they want to save the report and saves it if requested."""
+    def save_to_textfile(self):
+        """
+        Asks the user if they want to save the report to a .txt file.
+        If yes, saves the report using a sanitized filename and provides feedback.
+        """
         while True:
             save_choice = input("Save report as a text file? (yes/no): ").strip().lower()
             if save_choice in ['yes', 'y', 'no', 'n']:
@@ -78,9 +106,9 @@ class Report:
             print("Please enter 'yes' or 'no' (or 'y'/'n').")
         
         if save_choice in ['yes', 'y']:
-            safe_filename_name_part = self._sanitize_filename_component(self.student.name)
-            current_date_str = datetime.datetime.now().strftime("%Y%m%d")
-            txt_filename = f"{safe_filename_name_part}_report_{current_date_str}.txt"
+            safe_filename_name_part: str = Report._sanitize_filename_component(self.student.name)
+            current_date_str: str = datetime.datetime.now().strftime("%Y%m%d")
+            txt_filename: str = f"{safe_filename_name_part}_report_{current_date_str}.txt"
             
             try:
                 with open(txt_filename, 'w', encoding='utf-8') as file:
@@ -94,37 +122,50 @@ class Report:
             print("Text report not saved.")
     
     @staticmethod
-    def _sanitize_filename_component(name):
+    def _sanitize_filename_component(name: str) -> str:
         """
         Sanitizes a name string to make it safe for use as a filename component.
+        (Utility function, consistent with previous ideal rewrites)
         """
         name = name.strip() 
         if not name:       
             return "Unnamed_Student"
-        # Replace sequences of one or more whitespace characters with a single underscore
-        name = re.sub(r'\s+', '_', name)
-        # Remove any character that is not a word character (alphanumeric or underscore) or a hyphen
-        name = re.sub(r'[^\w-]', '', name)
-        if not name: # If name is empty after sanitization (e.g., was "!!!")
+        name = re.sub(r'\s+', '_', name) # Replace sequences of whitespace with a single underscore
+        name = re.sub(r'[^\w-]', '', name) # Remove non (alphanumeric or underscore or hyphen)
+        if not name: 
             return "Unnamed_Student"
         return name
 
 
 class CSVLogger:
-    """Class to handle logging student data to CSV file."""
+    """
+    Handles logging student report data to a CSV file.
+    """
     
-    CSV_FILENAME = "student_records.csv"
-    FIELDS = ["Timestamp", "Student Name", "Grade", "Performance Rating", "Performance Description"]
+    CSV_FILENAME: str = "student_records.csv"
+    FIELDS: list[str] = ["Timestamp", "Student Name", "Grade", "Performance Rating", "Performance Description"]
     
     @classmethod
-    def log_student(cls, student):
-        """Logs student report details to student_records.csv."""
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        data_row = [timestamp, student.name, student.grade, student.performance_rating, student.performance_description]
+    def log_entry(cls, student: Student):
+        """
+        Logs the provided student's details to the CSV file.
+        Creates the file with headers if it doesn't exist or is empty.
+
+        Args:
+            student (Student): The Student object whose data will be logged.
+        """
+        timestamp: str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data_row: list = [
+            timestamp, 
+            student.name, 
+            student.grade, 
+            student.performance_rating, 
+            student.performance_description
+        ]
         
         try:
             header_needed = False
-            if not os.path.isfile(cls.CSV_FILENAME): # Corrected from os.path.exists to os.path.isfile
+            if not os.path.isfile(cls.CSV_FILENAME):
                 header_needed = True
             else:
                 # File exists, check if it's empty to decide if header is needed
@@ -136,7 +177,7 @@ class CSVLogger:
                 if header_needed:
                     writer.writerow(cls.FIELDS)
                 writer.writerow(data_row)
-                # Optional: print("Data logged to CSV successfully.")
+                # print("Data logged to CSV successfully.") # Optional success message
         except IOError as e:
             print(f"Error logging to CSV file (I/O): {str(e)}")
         except Exception as e:
@@ -144,21 +185,24 @@ class CSVLogger:
 
 
 def main():
-    """Main function to run the student report generator."""
+    """
+    Main function to orchestrate the student report generation, display,
+    CSV logging, and .txt file saving process using OOP principles.
+    """
     print("Welcome to the Student Report Form Generator!")
     
     # Get student details and create Student object
-    student = Student.get_student_details_from_user()
+    student: Student = Student.get_student_details_from_user()
     
-    # Create and display the report
-    report = Report(student)
-    report.display()
+    # Create Report object, (report content is generated on init) and display it
+    report_document: Report = Report(student)
+    report_document.display_on_console()
     
-    # Log student data to CSV
-    CSVLogger.log_student(student)
+    # Log student data to CSV using CSVLogger class method
+    CSVLogger.log_entry(student)
     
-    # Offer to save the report to a .txt file
-    report.save_to_txt()
+    # Offer to save the report to a .txt file using Report's method
+    report_document.save_to_textfile()
 
 
 if __name__ == "__main__":
