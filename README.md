@@ -1,17 +1,27 @@
-# Student Report Form Generator (assessment_school)
+# Student Report Form Generator (assessment_school.py)
 
 ## Description
 
-This project, `assessment_school.py`, is a simple Python script that allows users to generate a student report form. It prompts the user to enter the student's name, grade, and a performance rating (on a scale of 1 to 5). Based on this input, it then generates and prints a formatted report card, including a descriptive interpretation of the performance rating.
+This project, `assessment_school.py`, is an enhanced Python script designed to generate student report forms. It interactively collects student details (name, grade, and a performance rating), displays a formatted report, logs key information to a CSV file for record-keeping, and offers an option to save the individual report as a `.txt` file. The script is built with an object-oriented approach for better organization and maintainability.
 
-## Files
+## Features
+
+* **Interactive Data Entry:** Prompts for student's name, grade, and a 1-5 performance rating with input validation.
+* **Console Report Display:** Shows a clearly formatted student report directly in the console.
+* **CSV Logging:** Automatically appends key details of each generated report (timestamp, name, grade, rating, description) to a `student_records.csv` file. Creates the file with headers if it doesn't exist.
+* **Optional `.txt` File Saving:** Prompts the user to save the generated report to an individual text file (e.g., `Jane_Doe_report_20250525.txt`). Filenames are sanitized for safety.
+* **Object-Oriented Design:** The underlying code is structured using classes for better organization and encapsulation of functionalities.
+
+## Files in the Project / Generated
 
 * `assessment_school.py`: The main Python script containing the program logic.
-* `README.md`: This file, providing information about the project.
+* `README.md`: This documentation file.
+* `student_records.csv` (Generated): A CSV file where student report data is logged. Created/appended by the script.
+* `*_report_YYYYMMDD.txt` (Generated): Individual student reports, optionally saved by the user (e.g., `Jane_Doe_report_20250525.txt`).
 
 ## Requirements
 
-* Python 3.x
+* Python 3.x (Standard library only, no external packages needed beyond what's included with Python)
 
 ## How to Run
 
@@ -25,25 +35,12 @@ This project, `assessment_school.py`, is a simple Python script that allows user
     python assessment_school.py
     ```
 
-6.  The script will then prompt you to enter the student's details:
-    * Student's name
-    * Student's grade (e.g., A, B, C)
-    * Student's performance rating (a number from 1 to 5)
-
-7.  After providing the inputs, the script will display the formatted student report.
+6.  The script will then:
+    * Prompt you to enter the student's details (name, grade, performance rating).
+    * Display the formatted student report on the console.
+    * Automatically log the report details to `student_records.csv`.
+    * Ask if you want to save the report to a `.txt` file.
 
 ## Example Usage
 
-When you run the script, it will look something like this:
-Welcome to the Student Report Form Generator!
-Enter the student's name: Jane Doe
-Enter the student's grade (e.g., A, B, C): A
-Rate the student's performance (1-5): 5
-
-===========================
-STUDENT REPORT FORM
-===========================
-Name: Jane Doe
-Grade: A
-Performance Rating: 5 - Excellent
-===========================
+Here's what a typical interaction with the script might look like:
