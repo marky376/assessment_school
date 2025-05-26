@@ -2,7 +2,7 @@
 
 ## Description
 
-This project, `assessment_school.py`, is an enhanced Python script designed to generate student report forms. It interactively collects student details (name, grade, and a performance rating), displays a formatted report, logs key information to a CSV file for record-keeping, and offers an option to save the individual report as a `.txt` file. The script is built with an object-oriented approach for better organization and maintainability.
+This project, `assessment_analysis.py`, is an enhanced Python script designed to generate student report forms. It interactively collects student details (name, grade, and a performance rating), displays a formatted report, logs key information to a CSV file for record-keeping, and offers an option to save the individual report as a `.txt` file. The script is built with an object-oriented approach for better organization and maintainability.
 
 ## Features
 
